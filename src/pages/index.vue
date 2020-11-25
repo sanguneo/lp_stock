@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="AppTitle">🧴 LPP 재고관리 <nuxt-link to="/log">🛒</nuxt-link></div>
+    <div class="AppTitle"><a href="https://docs.google.com/spreadsheets/d/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/edit#gid=0" target="_blank">🧴</a> LPP 재고관리 <nuxt-link to="/log">🛒</nuxt-link></div>
     <ul id="stockList" :class="{showToUse}" ref="stockList">
       <li rel="head">
         <div class="title">물품명</div>
@@ -23,6 +23,7 @@
       <input type="text" v-model="user" placeholder="사용자 (ex, 교육부 홍길동)" ref="user">
       <button @click="submit">사용합니다</button>
     </div>
+    <div v-show="fetching" class="fetching"><div class="loader"></div></div>
   </div>
 </template>
 
@@ -36,6 +37,7 @@ export default {
       touseList: {},
       showToUse: false,
       user: null,
+      fetching:true
     }
   },
   created() {
@@ -43,9 +45,11 @@ export default {
   },
   methods: {
     getStockList() {
+      this.fetching = true;
       axios.get('https://sheets.googleapis.com/v4/spreadsheets/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/values/재고현황?key=AIzaSyAS7amO6h0t_fO1wvPOWQpvs7AX2z4rr6I').then(({ data }) => data.values)
         .then(([head, ...stockList]) => {
           this.stockList = stockList;
+          this.fetching = false;
         })
     },
     inputTouseList(title, count) {
@@ -56,6 +60,7 @@ export default {
       this.touseList[title] = parseInt(count, 10) || undefined;
     },
     appendLog(row) {
+      this.fetching = true;
       const id = 'id_' + Date.now()
       const jsonp = document.createElement('script')
       window.callback = (...args) => console.log(...args)
@@ -67,6 +72,7 @@ export default {
         Array.from(this.$refs.stockList.querySelectorAll('input')).forEach(e=> {
           e.value = null;
         })
+        this.fetching = false;
         this.getStockList();
       }
       document.head.appendChild(jsonp);
@@ -90,6 +96,7 @@ export default {
 .container {
   margin: 0 auto;
   min-height: 100vh;
+  max-width:100vw;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -103,10 +110,12 @@ export default {
     text-decoration: none;
   }
 }
+
 #stockList {
   margin:0;
   padding: 0;
-  width: 500px;
+  width: 100vw;
+  max-width: 500px;
   box-sizing: border-box;
   border: 1px solid black;
   list-style: none;
@@ -178,4 +187,76 @@ export default {
     width: 100px;
   }
 }
+.fetching {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(#000000, 0.5);
+  z-index: 12800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.loader,
+.loader:before,
+.loader:after {
+  background: #ffffff;
+  -webkit-animation: load1 1s infinite ease-in-out;
+  animation: load1 1s infinite ease-in-out;
+  width: 1em;
+  height: 4em;
+}
+.loader {
+  color: #ffffff;
+  text-indent: -9999em;
+  margin: 88px auto;
+  position: relative;
+  font-size: 11px;
+  -webkit-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-animation-delay: -0.16s;
+  animation-delay: -0.16s;
+}
+.loader:before,
+.loader:after {
+  position: absolute;
+  top: 0;
+  content: '';
+}
+.loader:before {
+  left: -1.5em;
+  -webkit-animation-delay: -0.32s;
+  animation-delay: -0.32s;
+}
+.loader:after {
+  left: 1.5em;
+}
+@-webkit-keyframes load1 {
+  0%,
+  80%,
+  100% {
+    box-shadow: 0 0;
+    height: 4em;
+  }
+  40% {
+    box-shadow: 0 -2em;
+    height: 5em;
+  }
+}
+@keyframes load1 {
+  0%,
+  80%,
+  100% {
+    box-shadow: 0 0;
+    height: 4em;
+  }
+  40% {
+    box-shadow: 0 -2em;
+    height: 5em;
+  }
+}
+
 </style>
