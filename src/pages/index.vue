@@ -1,6 +1,7 @@
 <template>
   <div class="container">
-    <ul id="stockList" :class="{showToUse}">
+    <div class="AppTitle">🧴 LPP 재고관리 <nuxt-link to="/log">🛒</nuxt-link></div>
+    <ul id="stockList" :class="{showToUse}" ref="stockList">
       <li rel="head">
         <div class="title">물품명</div>
         <div class="existing">개수</div>
@@ -9,7 +10,7 @@
       <li rel="row" v-for="(stock, idx) in stockList">
         <div class="title">{{stock[0]}}</div>
         <div class="existing">{{stock[1]}}</div>
-        <div class="touse"><input type="number" @input="inputTouseList(stock[0], $event.target.value)"></div>
+        <div class="touse"><input type="number" @input="inputTouseList('A' + (idx + 2) +'|' + stock[0], $event.target.value)"></div>
       </li>
     </ul>
     <div class="showToUseBox">
@@ -19,7 +20,7 @@
       </label>
     </div>
     <div class="form" v-show="showToUse">
-      <input type="text" v-model="user" placeholder="사용자 (ex, 교육부 홍길동)">
+      <input type="text" v-model="user" placeholder="사용자 (ex, 교육부 홍길동)" ref="user">
       <button @click="submit">사용합니다</button>
     </div>
   </div>
@@ -42,21 +43,44 @@ export default {
   },
   methods: {
     getStockList() {
-      axios.get('https://sheets.googleapis.com/v4/spreadsheets/1Gu2Btvfw76R2d9QRahYoAKKE2ijjjRr4LbMhD4bjoKY/values/재고현황?key=AIzaSyAS7amO6h0t_fO1wvPOWQpvs7AX2z4rr6I').then(({ data }) => data.values)
+      axios.get('https://sheets.googleapis.com/v4/spreadsheets/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/values/재고현황?key=AIzaSyAS7amO6h0t_fO1wvPOWQpvs7AX2z4rr6I').then(({ data }) => data.values)
         .then(([head, ...stockList]) => {
           this.stockList = stockList;
         })
     },
     inputTouseList(title, count) {
-      this.touseList[title] = parseInt(count, 10)|| undefined;
+      if (!count || count === 0 || count === '') {
+        if (this.touseList[title]) delete this.touseList[title];
+        return;
+      }
+      this.touseList[title] = parseInt(count, 10) || undefined;
     },
     appendLog(row) {
-      axios.put('https://sheets.googleapis.com/v4/spreadsheets/1Gu2Btvfw76R2d9QRahYoAKKE2ijjjRr4LbMhD4bjoKY/values/변동현황!A1:C2?key=AIzaSyAS7amO6h0t_fO1wvPOWQpvs7AX2z4rr6I&valueInputOption=USER_ENTERED', {
-        values: [row]
-      })
+      const id = 'id_' + Date.now()
+      const jsonp = document.createElement('script')
+      window.callback = (...args) => console.log(...args)
+      window.jsonpLoaded = () => document.head.removeChild(jsonp);
+      jsonp.id = id;
+      jsonp.src = 'https://script.google.com/macros/s/AKfycbyHrqmT5deP6pprUS7wDlocGjjrL8v3FQGvjRkob5BAdEoNDXc/exec?method=updateStock&userdata=' +encodeURIComponent(JSON.stringify(row))+ '&v=' + id;
+      jsonp.onload = () => {
+        document.head.removeChild(document.querySelector(`#${id}`));
+        Array.from(this.$refs.stockList.querySelectorAll('input')).forEach(e=> {
+          e.value = null;
+        })
+        this.getStockList();
+      }
+      document.head.appendChild(jsonp);
     },
     submit() {
-      this.appendLog([Date.now(), this.user, Object.fromEntries(Object.entries(this.touseList).filter(e=>e[1] && e[1]!==0))]);
+      if (!this.user && this.user !== '') {
+        alert('사용자를 입력해주세요.');
+        this.$refs.user.focus();
+        return;
+      }
+
+      this.appendLog({time: new Date().toLocaleDateString(), user: this.user, use: Object.entries(this.touseList).filter(e=>e[1] && e[1]!==0).map(e=>([e[0].split('|')[0].slice(1), e[1]])), useString: Object.entries(this.touseList).filter(e=>e[1] && e[1]!==0).map(e=>[e[0].split('|')[1], e[1]].join(' : ') + '개').join('   |   ')});
+      this.touseList = {}
+
     }
   }
 }
@@ -71,6 +95,13 @@ export default {
   justify-content: center;
   align-items: center;
   text-align: center;
+}
+.AppTitle {
+  font-size: 30px;
+  margin-bottom: 20px;
+  a {
+    text-decoration: none;
+  }
 }
 #stockList {
   margin:0;
