@@ -44,6 +44,23 @@ export default {
 </script>
 
 <style lang="scss">
+.container {
+  margin: 0 auto;
+  min-height: 100vh;
+  max-width:100vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.AppTitle {
+  font-size: 30px;
+  margin-bottom: 20px;
+  a {
+    text-decoration: none;
+  }
+}
 #logList {
   margin:0;
   padding: 0;
