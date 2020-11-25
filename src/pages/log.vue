@@ -24,7 +24,7 @@ export default {
   data() {
     return {
       logList: [],
-      fetching:true
+      fetching:false
     }
   },
   created() {
@@ -32,9 +32,11 @@ export default {
   },
   methods: {
     getLogList() {
+      this.fetching = true;
       axios.get('https://sheets.googleapis.com/v4/spreadsheets/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/values/변동현황?key=AIzaSyAS7amO6h0t_fO1wvPOWQpvs7AX2z4rr6I').then(({ data }) => data.values)
         .then(([head, ...logList]) => {
           this.logList = logList;
+          this.fetching = false;
         })
     },
   }
