@@ -1,13 +1,13 @@
 <template>
   <div class="container">
     <div class="AppTitle"><a href="https://docs.google.com/spreadsheets/d/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/edit#gid=0" target="_blank">🧴</a> LPP 재고관리 / 사용내역 <nuxt-link to="/">🛒</nuxt-link></div>
-    <ul id="logList" :class="{showToUse}" ref="stockList">
+    <ul id="logList" ref="stockList">
       <li rel="head">
         <div class="date">사용일</div>
         <div class="user">사용자</div>
         <div class="log">사용내역</div>
       </li>
-      <li rel="row" v-for="(log, idx) in logList">
+      <li rel="row" v-for="(log, idx) in logListComputed">
         <div class="date">{{log[0]}}</div>
         <div class="user">{{log[1]}}</div>
         <div class="log" v-html="log[2].split(' | ').map(e=>'<div>' + e.trim() + '</div>').join('\n')"></div>
@@ -23,11 +23,21 @@ export default {
   name: 'index',
   data() {
     return {
+      user: null,
       logList: [],
-      fetching:false
+      isManager: false,
+      fetching:false,
+    }
+  },
+  computed: {
+    logListComputed() {
+      const loglist = this.logList || [];
+      return this.isManager ? loglist : loglist.filter(log => log[1].trim() === this.user.trim())
     }
   },
   created() {
+    this.user = window.localStorage.lpuser || null;
+    this.isManager = !!window.localStorage.isManager;
     this.getLogList()
   },
   methods: {
@@ -35,7 +45,7 @@ export default {
       this.fetching = true;
       axios.get('https://sheets.googleapis.com/v4/spreadsheets/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/values/변동현황?key=AIzaSyAS7amO6h0t_fO1wvPOWQpvs7AX2z4rr6I').then(({ data }) => data.values)
         .then(([head, ...logList]) => {
-          this.logList = logList;
+          this.logList = logList.filter(e=>e[2]);
           this.fetching = false;
         })
     },

@@ -16,11 +16,11 @@
     <div class="showToUseBox">
       <label>
         <input type="checkbox" v-model="showToUse"/>
-        재고물품 사용
+        재고 물품 사용
       </label>
     </div>
     <div class="form" v-show="showToUse">
-      <input type="text" v-model="user" placeholder="사용자 (ex, 교육부 홍길동)" ref="user">
+      <input type="text" v-model.lazy="user" placeholder="사용자 (ex, 교육부 홍길동)" ref="user">
       <button @click="submit">사용합니다</button>
     </div>
     <div v-show="fetching" class="fetching"><div class="loader"></div></div>
@@ -40,7 +40,13 @@ export default {
       fetching:false
     }
   },
+  watch: {
+    user(user, olduser) {
+      window.localStorage.lpuser = user;
+    }
+  },
   created() {
+    this.user = window.localStorage.lpuser || null;
     this.getStockList()
   },
   methods: {
@@ -89,7 +95,7 @@ export default {
         this.$refs.user.focus();
         return;
       }
-      if (Object.entries(this.touseList).some(e=>!e[1] && e[1]===0)) {
+      if (Object.entries(this.touseList).length <= 0 || Object.entries(this.touseList).some(e=>!e[1] && e[1]===0)) {
         alert('사용할 물품에 수량을 입력하세요.');
         return;
       }
