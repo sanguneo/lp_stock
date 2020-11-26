@@ -1,7 +1,13 @@
 <template>
   <div class="container">
     <div class="AppTitle"><a href="https://docs.google.com/spreadsheets/d/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/edit#gid=0" target="_blank">🧴</a> LPP 재고관리 / 사용내역 <nuxt-link to="/">🛒</nuxt-link></div>
-    <ul id="logList" ref="stockList">
+    <div class="search">
+      <select v-model="thismonth">
+        <option :value="month" v-for="month in monthList">{{month}}</option>
+      </select>
+      <input type="text" v-model="searchUser" placeholder="사용자를 검색해보세요( ex 상구너 )">
+    </div>
+    <ul id="logList" class="logList" ref="stockList">
       <li rel="head">
         <div class="date">사용일</div>
         <div class="user">사용자</div>
@@ -11,6 +17,17 @@
         <div class="date">{{log[0]}}</div>
         <div class="user">{{log[1]}}</div>
         <div class="log" v-html="log[2].split(' | ').map(e=>'<div>' + e.trim() + '</div>').join('\n')"></div>
+      </li>
+    </ul>
+    <div class="subtitle">당월 총 사용</div>
+    <ul id="monthlyList" class="logList">
+      <li rel="head">
+        <div class="date">사용월</div>
+        <div class="log">사용내역</div>
+      </li>
+      <li rel="row" v-for="(log, idx) in monthlyList">
+        <div class="date">{{log[0]}}</div>
+        <div class="log" v-html="log[1]"></div>
       </li>
     </ul>
     <div v-show="fetching" class="fetching"><div class="loader"></div></div>
@@ -27,17 +44,44 @@ export default {
       logList: [],
       isManager: false,
       fetching:false,
+      searchUser: null,
+      thismonth: new Date().toLocaleDateString().split(' ').slice(0,2).join(' ')
     }
   },
   computed: {
     logListComputed() {
-      const loglist = this.logList || [];
+      let loglist = this.logList.filter(log => log[0].startsWith(this.thismonth)) || [];
+      loglist = (this.searchUser && this.searchUser !== '' ? loglist.filter(log => log[1].trim().includes(this.searchUser.trim())) : loglist);
       return this.isManager ? loglist : loglist.filter(log => log[1].trim() === this.user.trim())
+    },
+    monthList() {
+      const loglist = this.logListComputed;
+      const monthList = Array.from(new Set(loglist.map(e=> e[0].split(' ').splice(0,2).join(' '))));
+      return monthList
+    },
+    monthlyList() {
+      const monthlyObject = {};
+      for (const month of this.monthList) {
+        let sameMonth = {};
+        let sameMonthArray = this.logListComputed.filter(e=>e[0].startsWith(month))
+          .map(log =>log[2].split(' | ').map(e=>e.split(':').map(r=>r.trim())))
+          .flat(1)
+          .map(e=>([e[0], parseInt(e[1].replace('개', ''), 10)]));
+        for (const sameMonthItem of sameMonthArray) {
+          if (!sameMonth[sameMonthItem[0]]) sameMonth[sameMonthItem[0]] = 0;
+          sameMonth[sameMonthItem[0]] += parseInt(sameMonthItem[1], 10);
+        }
+        monthlyObject[month] = Object.entries(sameMonth).map(e=>e[0].trim() + ' : ' + e[1] + '개').join('<br>');
+      }
+      return Object.entries(monthlyObject);
     }
   },
   created() {
     this.user = window.localStorage.lpuser || null;
     this.isManager = !!window.localStorage.isManager;
+    if (!this.isManager) {
+      this.searchUser = this.user;
+    }
     this.getLogList()
   },
   methods: {
@@ -71,7 +115,25 @@ export default {
     text-decoration: none;
   }
 }
-#logList {
+.search {
+  width: 600px;
+  margin-top: 50px;
+  margin-bottom: 10px;
+  font-size: 20px;
+  display: flex;
+  justify-content: space-between;
+  select, input {
+    height: 30px;
+  }
+  input {
+    width: calc(100% - 100px);
+  }
+}
+.subtitle {
+  margin-top: 50px;
+  font-size: 20px;
+}
+.logList {
   margin:0;
   padding: 0;
   width: 600px;
@@ -103,6 +165,7 @@ export default {
       flex-direction: column;
       justify-content: center;
       align-items: flex-start;
+      text-align: left;
     }
     &[rel=head] {
       background-color: lightgray;

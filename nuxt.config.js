@@ -10,7 +10,7 @@ export default {
     title: 'lp_stock',
     meta: [
       { charset: 'utf-8' },
-      { name: 'viewport', content: 'width=600' },
+      { name: 'viewport', content: 'width=600, user-scalable=no' },
       { hid: 'description', name: 'description', content: '' }
     ],
     link: [
