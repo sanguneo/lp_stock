@@ -24,6 +24,7 @@
       <button @click="submit">사용합니다</button>
     </div>
     <div v-show="fetching" class="fetching"><div class="loader"></div></div>
+    <div class="beManager" @click="beManager"></div>
   </div>
 </template>
 
@@ -103,6 +104,10 @@ export default {
       this.appendLog({time: new Date().toLocaleDateString(), user: this.user, use: Object.entries(this.touseList).filter(e=>e[1] && e[1]!==0).map(e=>([e[0].split('|')[0].slice(1), e[1]])), useString: Object.entries(this.touseList).filter(e=>e[1] && e[1]!==0).map(e=>[e[0].split('|')[1], e[1]].join(' : ') + '개').join('   |   ')});
       this.touseList = {}
 
+    },
+    beManager(){
+      if (window.prompt('매니저코드를 입력하세요.') !== '201101') return;
+      window.localStorage.isManager = true;
     }
   }
 }
@@ -118,6 +123,13 @@ export default {
   justify-content: center;
   align-items: center;
   text-align: center;
+}
+.beManager {
+  width: 20px;
+  height: 20px;
+  position: fixed;
+  left: 0;
+  top: 0;
 }
 .AppTitle {
   font-size: 30px;
