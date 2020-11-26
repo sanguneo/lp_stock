@@ -10,7 +10,7 @@
       <li rel="row" v-for="(stock, idx) in stockList">
         <div class="title">{{stock[0]}}</div>
         <div class="existing">{{stock[1]}}</div>
-        <div class="touse"><input type="number" @input="inputTouseList('A' + (idx + 2) +'|' + stock[0], $event.target.value)"></div>
+        <div class="touse"><input type="number" @input="inputTouseList('A' + (idx + 2) +'|' + stock[0], $event.target.value, $event, stock[1])" min="0"></div>
       </li>
     </ul>
     <div class="showToUseBox">
@@ -52,9 +52,15 @@ export default {
           this.fetching = false;
         })
     },
-    inputTouseList(title, count) {
-      if (!count || count === 0 || count === '') {
+    inputTouseList(title, count, event, current) {
+      if (!count || count === 0 || count < 0 || count === '') {
+        event.target.value = null;
         if (this.touseList[title]) delete this.touseList[title];
+        return;
+      }
+      if (parseInt(current, 10) < parseInt(count, 10)) {
+        alert('현재 재고이상 사용할 수 없습니다');
+        event.target.value = null;
         return;
       }
       this.touseList[title] = parseInt(count, 10) || undefined;
@@ -81,6 +87,10 @@ export default {
       if (!this.user && this.user !== '') {
         alert('사용자를 입력해주세요.');
         this.$refs.user.focus();
+        return;
+      }
+      if (Object.entries(this.touseList).some(e=>!e[1] && e[1]===0)) {
+        alert('사용할 물품에 수량을 입력하세요.');
         return;
       }
 
