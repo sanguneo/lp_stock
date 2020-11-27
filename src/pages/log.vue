@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="AppTitle"><a href="https://docs.google.com/spreadsheets/d/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/edit#gid=0" target="_blank">🧴</a> LPP 재고관리 / 사용내역 <nuxt-link to="/">🛒</nuxt-link></div>
+    <div class="AppTitle"><a href="https://docs.google.com/spreadsheets/d/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/edit#gid=0" target="_blank">🧴</a> LPP 물품관리 / 사용내역 <nuxt-link to="/">🛒</nuxt-link></div>
     <div class="search">
       <select v-model="thismonth">
         <option :value="month" v-for="month in monthList">{{month}}</option>

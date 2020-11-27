@@ -9,11 +9,12 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
+    "@nuxtjs/pwa": "^3.2.2",
     "axios": "^0.19.2",
-    "vuex": "^3.4.0",
     "core-js": "^3.6.5",
+    "moment": "^2.27.0",
     "nuxt": "^2.14.6",
-    "moment": "^2.27.0"
+    "vuex": "^3.4.0"
   },
   "devDependencies": {
     "node-sass": "^4.13.1",

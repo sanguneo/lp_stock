@@ -1,11 +1,5 @@
-# STATIC
-
-**This directory is not required, you can delete it if you don't want to use it.**
-
-This directory contains your static files.
-Each file inside this directory is mapped to `/`.
-Thus you'd want to delete this README.md before deploying to production.
-
-Example: `/static/robots.txt` is mapped as `/robots.txt`.
-
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/guide/assets#static).
+{rel:"apple-touch-startup-image", href:"splashscreens/iphone6_splash.png", media:"(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" },
+{rel:"apple-touch-startup-image", href:"splashscreens/iphoneplus_splash.png", media:"(device-width: 621px) and (device-height: 1104px) and (-webkit-device-pixel-ratio: 3)" },
+{rel:"apple-touch-startup-image", href:"splashscreens/iphonex_splash.png", media:"(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" },
+{rel:"apple-touch-startup-image", href:"splashscreens/iphonexr_splash.png", media:"(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" },
+{ rel:"apple-touch-startup-image, href:"splashscreens/iphonexsmax_splash.png", media:"(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) "}

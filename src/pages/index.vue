@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="AppTitle"><a href="https://docs.google.com/spreadsheets/d/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/edit#gid=0" target="_blank">🧴</a> LPP 재고관리 <nuxt-link to="/log">🛒</nuxt-link></div>
+    <div class="AppTitle"><a href="https://docs.google.com/spreadsheets/d/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/edit#gid=0" target="_blank">🧴</a> LPP 물품관리 <nuxt-link to="/log">🛒</nuxt-link></div>
     <ul id="stockList" :class="{showToUse}" ref="stockList">
       <li rel="head">
         <div class="title">물품명</div>
