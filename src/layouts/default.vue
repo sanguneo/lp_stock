@@ -8,9 +8,11 @@ export default {
 </script>
 
 <style>
+@import url(http://fonts.googleapis.com/earlyaccess/notosanskr.css);
+
 html {
   font-family:
-    'Source Sans Pro',
+    'Noto Sans KR',
     -apple-system,
     BlinkMacSystemFont,
     'Segoe UI',

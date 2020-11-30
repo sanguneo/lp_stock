@@ -52,12 +52,15 @@ export default {
     logListComputed() {
       let loglist = this.logList.filter(log => log[0].startsWith(this.thismonth)) || [];
       loglist = (this.searchUser && this.searchUser !== '' ? loglist.filter(log => log[1].trim().includes(this.searchUser.trim())) : loglist);
-      return this.isManager ? loglist : loglist.filter(log => log[1].trim() === this.user.trim())
+      return this.isManager ? loglist : loglist.filter(log => String(log[1]).trim() === String(this.user).trim())
     },
     monthList() {
       const loglist = this.logListComputed;
       const monthList = Array.from(new Set(loglist.map(e=> e[0].split(' ').splice(0,2).join(' '))));
-      return monthList
+      if (monthList.length <= 0) {
+        monthList.push(this.thismonth);
+      }
+      return monthList;
     },
     monthlyList() {
       const monthlyObject = {};
@@ -116,7 +119,7 @@ export default {
   }
 }
 .search {
-  width: 600px;
+  width: 500px;
   margin-top: 50px;
   margin-bottom: 10px;
   font-size: 20px;
@@ -136,10 +139,11 @@ export default {
 .logList {
   margin:0;
   padding: 0;
-  width: 600px;
+  width: 500px;
   box-sizing: border-box;
   border: 1px solid black;
   list-style: none;
+  font-size: 15px;
   & > li {
     min-height: 40px;
     display: flex;
@@ -178,25 +182,6 @@ export default {
     & > li > div.touse {
       display: none;
     }
-  }
-}
-.showToUseBox {
-  margin: 20px 0;
-  width: 500px;
-  text-align: left;
-}
-.form {
-  width: 500px;
-  display: flex;
-  justify-content: flex-end;
-  & > input {
-    padding: 0 10px;
-    height: 50px;
-    width: 200px;
-  }
-  & > button {
-    margin-left: 10px;
-    width: 100px;
   }
 }
 .fetching {

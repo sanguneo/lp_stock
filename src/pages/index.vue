@@ -1,6 +1,14 @@
 <template>
   <div class="container">
     <div class="AppTitle"><a href="https://docs.google.com/spreadsheets/d/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/edit#gid=0" target="_blank">🧴</a> LPP 물품관리 <nuxt-link to="/log">🛒</nuxt-link></div>
+    <div class="showToUseBox">
+      <label class="circleSwitch" :class="{checked: value}">
+        <input type="checkbox" v-model="showToUse" />
+        <span class="slider round"></span>
+        재고 물품 사용
+      </label>
+    </div>
+
     <ul id="stockList" :class="{showToUse}" ref="stockList">
       <li rel="head">
         <div class="title">물품명</div>
@@ -13,12 +21,6 @@
         <div class="touse"><input type="number" @input="inputTouseList('A' + (idx + 2) +'|' + stock[0], $event.target.value, $event, stock[1])" min="0"></div>
       </li>
     </ul>
-    <div class="showToUseBox">
-      <label>
-        <input type="checkbox" v-model="showToUse"/>
-        재고 물품 사용
-      </label>
-    </div>
     <div class="form" v-show="showToUse">
       <input type="text" v-model.lazy="user" placeholder="사용자 (ex, 교육부 홍길동)" ref="user">
       <button @click="submit">사용합니다</button>
@@ -147,6 +149,7 @@ export default {
   box-sizing: border-box;
   border: 1px solid black;
   list-style: none;
+  font-size: 15px;
   & > li {
     height: 40px;
     display: flex;
@@ -199,20 +202,81 @@ export default {
 .showToUseBox {
   margin: 20px 0;
   width: 500px;
-  text-align: left;
+  text-align: right;
+  .circleSwitch {
+    position: relative;
+    display: inline-block;
+    width: 120px;
+    height: 16px;
+    text-align: right;
+    font-size: 13px;
+    & > input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    & > .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      width: 30px;
+      bottom: 0;
+      background-color: #ccc;
+      -webkit-transition: .4s;
+      transition: .4s;
+      &.round {
+        border-radius: 8px;
+      }
+      &.round:before {
+        border-radius: 50%;
+      }
+      &:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 0;
+        bottom: 0;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+        box-sizing: border-box;
+        border: 2px solid #707070;
+      }
+    }
+    input:checked + .slider {
+      background-color: #707070;
+    }
+
+    input:focus + .slider {
+      box-shadow: 0 0 1px #707070;
+    }
+
+    input:checked + .slider:before {
+      -webkit-transform: translateX(14px);
+      -ms-transform: translateX(14px);
+      transform: translateX(14px);
+    }
+  }
 }
 .form {
   width: 500px;
   display: flex;
   justify-content: flex-end;
+  margin: 20px 0;
   & > input {
     padding: 0 10px;
-    height: 50px;
+    height: 40px;
     width: 200px;
   }
   & > button {
     margin-left: 10px;
     width: 100px;
+    box-sizing: border-box;
+    border-radius: 0;
+    border: 1px solid gray;
+    background-color: #e9e9e9;
   }
 }
 .fetching {
