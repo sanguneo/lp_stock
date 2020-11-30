@@ -2,7 +2,7 @@
   <div class="container">
     <div class="AppTitle"><a href="https://docs.google.com/spreadsheets/d/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/edit#gid=0" target="_blank">🧴</a> LPP 물품관리 <nuxt-link to="/log">🛒</nuxt-link></div>
     <div class="showToUseBox">
-      <label class="circleSwitch" :class="{checked: value}">
+      <label class="circleSwitch" :class="{checked: showToUse}">
         <input type="checkbox" v-model="showToUse" />
         <span class="slider round"></span>
         재고 물품 사용
@@ -22,7 +22,7 @@
       </li>
     </ul>
     <div class="form" v-show="showToUse">
-      <input type="text" v-model.lazy="user" placeholder="사용자 (ex, 교육부 홍길동)" ref="user">
+      <input type="text" v-model="user" placeholder="사용자 (ex, 교육부 홍길동)" ref="user">
       <button @click="submit">사용합니다</button>
     </div>
     <div v-show="fetching" class="fetching"><div class="loader"></div></div>
