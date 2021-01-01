@@ -23,7 +23,7 @@ export default {
     fetchStockList(store) {
       return axios.get('https://sheets.googleapis.com/v4/spreadsheets/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/values/재고현황?key=AIzaSyAS7amO6h0t_fO1wvPOWQpvs7AX2z4rr6I').then(({ data }) => data.values)
         .then(([head, ...stockList]) => {
-          localStorage.lpStock_list = JSON.stringify(stockList.map(e=>([e[0],e[1],e[2]])));
+          localStorage.lpStock_list = JSON.stringify(stockList);
           store.commit('setStocklist', stockList);
         })
     },
