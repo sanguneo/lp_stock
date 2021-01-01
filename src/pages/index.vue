@@ -37,7 +37,7 @@ export default {
   name: 'index',
   data() {
     return {
-      stockList: [],
+
       touseList: {},
       query: '',
       showToUse: false,
@@ -46,6 +46,9 @@ export default {
     }
   },
   computed: {
+    stockList() {
+      return this.$store.getters['stocks/stockList'];
+    },
     queriedStockList() {
       return this.stockList.filter(e=>e[0].includes(this.query) ||e[1].includes(this.query) ||e[2].includes(this.query))
     },
@@ -60,13 +63,10 @@ export default {
     this.getStockList()
   },
   methods: {
-    getStockList() {
+    async getStockList() {
       this.fetching = true;
-      axios.get('https://sheets.googleapis.com/v4/spreadsheets/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/values/재고현황?key=AIzaSyAS7amO6h0t_fO1wvPOWQpvs7AX2z4rr6I').then(({ data }) => data.values)
-        .then(([head, ...stockList]) => {
-          this.stockList = stockList;
-          this.fetching = false;
-        })
+      await this.$store.dispatch('stocks/fetchStockList');
+      this.fetching = false;
     },
     inputTouseList(title, count, event, current) {
       if (!count || count === 0 || count < 0 || count === '') {
