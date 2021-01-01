@@ -16,7 +16,7 @@
       <li rel="row" v-for="(log, idx) in logListComputed">
         <div class="date">{{log[0]}}</div>
         <div class="user">{{log[1]}}</div>
-        <div class="log" v-html="log[2].split(' | ').map(e=>'<div>' + e.trim() + '</div>').join('\n')"></div>
+        <div class="log" v-html="log[2].map(e=>'<div>' + e + '개</div>').join('\n')"></div>
       </li>
     </ul>
     <div class="subtitle">당월 총 사용</div>
@@ -42,6 +42,7 @@ export default {
     return {
       user: null,
       logList: [],
+      stockList: {},
       isManager: false,
       fetching:false,
       searchUser: null,
@@ -52,6 +53,12 @@ export default {
     logListComputed() {
       let loglist = this.logList.filter(log => log[0].startsWith(this.thismonth)) || [];
       loglist = (this.searchUser && this.searchUser !== '' ? loglist.filter(log => log[1].trim().includes(this.searchUser.trim())) : loglist);
+      loglist.forEach(log => {
+        log[2] = log[2]
+          .split('\n')
+          .map(logRow => logRow.split(':').map(logCol => logCol.trim()))
+          .map(logRow => (this.stockList[logRow[0]] + ' : ' + logRow[1]))
+      });
       return this.isManager ? loglist : loglist.filter(log => String(log[1]).trim() === String(this.user).trim())
     },
     monthList() {
@@ -67,7 +74,7 @@ export default {
       for (const month of this.monthList) {
         let sameMonth = {};
         let sameMonthArray = this.logListComputed.filter(e=>e[0].startsWith(month))
-          .map(log =>log[2].split(' | ').map(e=>e.split(':').map(r=>r.trim())))
+          .map(log =>log[2].map(e=>e.split(':').map(r=>r.trim())))
           .flat(1)
           .map(e=>([e[0], parseInt(e[1].replace('개', ''), 10)]));
         for (const sameMonthItem of sameMonthArray) {
@@ -79,18 +86,27 @@ export default {
       return Object.entries(monthlyObject);
     }
   },
-  created() {
+  async created() {
     this.user = window.localStorage.lpuser || null;
     this.isManager = !!window.localStorage.isManager;
     if (!this.isManager) {
       this.searchUser = this.user;
     }
-    this.getLogList()
+    await this.getStockList();
+    await this.getLogList()
   },
   methods: {
+    getStockList() {
+      this.fetching = true;
+      return axios.get('https://sheets.googleapis.com/v4/spreadsheets/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/values/재고현황?key=AIzaSyAS7amO6h0t_fO1wvPOWQpvs7AX2z4rr6I').then(({ data }) => data.values)
+        .then(([head, ...stockList]) => {
+          this.stockList = Object.fromEntries(stockList.map(stock => ([stock[0], stock[1]])));
+          this.fetching = false;
+        })
+    },
     getLogList() {
       this.fetching = true;
-      axios.get('https://sheets.googleapis.com/v4/spreadsheets/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/values/변동현황?key=AIzaSyAS7amO6h0t_fO1wvPOWQpvs7AX2z4rr6I').then(({ data }) => data.values)
+      return axios.get('https://sheets.googleapis.com/v4/spreadsheets/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/values/변동현황?key=AIzaSyAS7amO6h0t_fO1wvPOWQpvs7AX2z4rr6I').then(({ data }) => data.values)
         .then(([head, ...logList]) => {
           this.logList = logList.filter(e=>e[2]);
           this.fetching = false;

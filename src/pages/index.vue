@@ -2,6 +2,7 @@
   <div class="container">
     <div class="AppTitle"><a href="https://docs.google.com/spreadsheets/d/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/edit#gid=0" target="_blank">🧴</a> LPP 물품관리 <nuxt-link to="/log">🛒</nuxt-link></div>
     <div class="showToUseBox">
+      <input type="text" v-model="query" placeholder="사용자를 검색해보세요( ex 상구너 )">
       <label class="circleSwitch" :class="{checked: showToUse}">
         <input type="checkbox" v-model="showToUse" />
         <span class="slider round"></span>
@@ -15,9 +16,9 @@
         <div class="existing">개수</div>
         <div class="touse">사용</div>
       </li>
-      <li rel="row" v-for="(stock, idx) in stockList">
-        <div class="title">{{stock[0]}}</div>
-        <div class="existing">{{stock[1]}}</div>
+      <li rel="row" v-for="(stock, idx) in queriedStockList">
+        <div class="title">{{stock[1]}}</div>
+        <div class="existing">{{stock[3]}}</div>
         <div class="touse"><input type="number" @input="inputTouseList('A' + (idx + 2) +'|' + stock[0], $event.target.value, $event, stock[1])" min="0"></div>
       </li>
     </ul>
@@ -38,10 +39,16 @@ export default {
     return {
       stockList: [],
       touseList: {},
+      query: '',
       showToUse: false,
       user: null,
       fetching:false
     }
+  },
+  computed: {
+    queriedStockList() {
+      return this.stockList.filter(e=>e[0].includes(this.query) ||e[1].includes(this.query) ||e[2].includes(this.query))
+    },
   },
   watch: {
     user(user, olduser) {
@@ -81,7 +88,7 @@ export default {
       window.callback = (...args) => console.log(...args)
       window.jsonpLoaded = () => document.head.removeChild(jsonp);
       jsonp.id = id;
-      jsonp.src = 'https://script.google.com/macros/s/AKfycbyHrqmT5deP6pprUS7wDlocGjjrL8v3FQGvjRkob5BAdEoNDXc/exec?method=updateStock&userdata=' +encodeURIComponent(JSON.stringify(row))+ '&v=' + id;
+      jsonp.src = 'https://script.google.com/macros/s/AKfycbx7UwkZOHIbtYrEUBfyLzgbCGKYJ5aVvUtEL271rlKr3EsfctC1feGg/exec?method=updateStock&userdata=' +encodeURIComponent(JSON.stringify(row))+ '&v=' + id;
       jsonp.onload = () => {
         document.head.removeChild(document.querySelector(`#${id}`));
         Array.from(this.$refs.stockList.querySelectorAll('input')).forEach(e=> {
@@ -103,7 +110,7 @@ export default {
         return;
       }
 
-      this.appendLog({time: new Date().toLocaleDateString(), user: this.user, use: Object.entries(this.touseList).filter(e=>e[1] && e[1]!==0).map(e=>([e[0].split('|')[0].slice(1), e[1]])), useString: Object.entries(this.touseList).filter(e=>e[1] && e[1]!==0).map(e=>[e[0].split('|')[1], e[1]].join(' : ') + '개').join('   |   ')});
+      this.appendLog({time: new Date().toLocaleDateString(), user: this.user, use: Object.entries(this.touseList).filter(e=>e[1] && e[1]!==0).map(e=>([e[0].split('|')[0].slice(1), e[1]])), useString: Object.entries(this.touseList).filter(e=>e[1] && e[1]!==0).map(e=>[e[0].split('|')[1], e[1]].join(':')).join('|')});
       this.touseList = {}
 
     },
@@ -146,6 +153,8 @@ export default {
   padding: 0;
   width: 100vw;
   max-width: 500px;
+  max-height: 400px;
+  overflow: overlay;
   box-sizing: border-box;
   border: 1px solid black;
   list-style: none;
@@ -156,6 +165,13 @@ export default {
     list-style: none;
 
     border-bottom: 1px solid gray;
+    &[rel=head] {
+      position: fixed;
+      width: 498px;
+    }
+    &:nth-child(2) {
+      margin-top: 40px;
+    }
     &:last-child {
       border-bottom: 0;
     }
@@ -202,7 +218,14 @@ export default {
 .showToUseBox {
   margin: 20px 0;
   width: 500px;
-  text-align: right;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  & > input[type=text] {
+    height: 30px;
+    flex:1;
+    margin-right: 20px;
+  }
   .circleSwitch {
     position: relative;
     display: inline-block;
