@@ -183,11 +183,11 @@ export default {
       flex: 1;
     }
     & > .existing {
-      width: 100px;
+      width: 70px;
       justify-content: center;
     }
     & > .touse {
-      width: 100px;
+      width: 70px;
       justify-content: center;
     }
     &[rel=head] {
