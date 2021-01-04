@@ -2,7 +2,7 @@
   <div class="container">
     <div class="AppTitle">🧴 LPP 물품관리 <nuxt-link to="/log">🛒</nuxt-link></div>
     <div class="showToUseBox">
-      <input type="text" v-model="query" placeholder="사용자를 검색해보세요( ex 상구너 )">
+      <input type="text" v-model="query" placeholder="물품을 검색해보세요 (물품코드, 물품명)">
       <label class="circleSwitch" :class="{checked: showToUse}">
         <input type="checkbox" v-model="showToUse" />
         <span class="slider round"></span>
