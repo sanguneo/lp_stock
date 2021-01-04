@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="AppTitle"><a href="https://docs.google.com/spreadsheets/d/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/edit#gid=0" target="_blank">🧴</a> LPP 물품관리 <nuxt-link to="/log">🛒</nuxt-link></div>
+    <div class="AppTitle">🧴 LPP 물품관리 <nuxt-link to="/log">🛒</nuxt-link></div>
     <div class="showToUseBox">
       <input type="text" v-model="query" placeholder="사용자를 검색해보세요( ex 상구너 )">
       <label class="circleSwitch" :class="{checked: showToUse}">
@@ -12,12 +12,12 @@
 
     <ul id="stockList" :class="{showToUse}" ref="stockList">
       <li rel="head">
-        <div class="title">물품명</div>
+        <div class="title">[물품코드] 물품명</div>
         <div class="existing">개수</div>
         <div class="touse">사용</div>
       </li>
-      <li rel="row" v-for="(stock, idx) in queriedStockList">
-        <div class="title">{{stock[1]}}</div>
+      <li rel="row" v-for="(stock, idx) in queriedStockList" :class="{empty: parseInt(stock[3], 10) === 0}">
+        <div class="title"><strong>[{{stock[0]}}]</strong>&nbsp;{{stock[1]}}</div>
         <div class="existing">{{stock[3]}}</div>
         <div class="touse"><input type="number" @input="inputTouseList('A' + (idx + 2) +'|' + stock[0], $event.target.value, $event, stock[1])" min="0"></div>
       </li>
@@ -37,7 +37,6 @@ export default {
   name: 'index',
   data() {
     return {
-
       touseList: {},
       query: '',
       showToUse: false,
@@ -50,7 +49,7 @@ export default {
       return this.$store.getters['stocks/stockList'];
     },
     queriedStockList() {
-      return this.stockList.filter(e=>e[0].includes(this.query) ||e[1].includes(this.query) ||e[2].includes(this.query))
+      return this.stockList.filter(e=>e[0].includes(this.query) ||e[1].includes(this.query))
     },
   },
   watch: {
