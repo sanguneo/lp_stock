@@ -19,7 +19,7 @@
         <div class="log" v-html="log[2].map(e=>'<div>' + e + '개</div>').join('\n')"></div>
       </li>
     </ul>
-    <div class="subtitle">당월 총 사용</div>
+    <div class="subtitle">월 총 사용</div>
     <ul id="monthlyList" class="logList">
       <li rel="head">
         <div class="date">사용월</div>
@@ -36,8 +36,13 @@
 
 <script>
 import axios from 'axios';
+
+const thismonthCalc = (() => {
+  const date = new Date();
+  return date.getFullYear().toString().padStart(4, '0') + '. ' + (date.getMonth() + 1).toString().padStart(2, '0') + '.'
+})();
 export default {
-  name: 'index',
+  name: 'log',
   data() {
     return {
       user: null,
@@ -46,42 +51,38 @@ export default {
       isManager: false,
       fetching:false,
       searchUser: null,
-      thismonth: new Date().toLocaleDateString().split(' ').slice(0,2).join(' ')
+      thismonth: thismonthCalc
     }
   },
   computed: {
     logListComputed() {
       let loglist = this.logList.filter(log => log[0].startsWith(this.thismonth)) || [];
-      loglist = (this.searchUser && this.searchUser !== '' ? loglist.filter(log => log[1].trim().includes(this.searchUser.trim())) : loglist);
-      loglist.forEach(log => {
-        log[2] = log[2]
+      loglist = loglist.map(log => ([
+        log[0], log[1], log[2]
           .split('\n')
           .map(logRow => logRow.split(':').map(logCol => logCol.trim()))
           .map(logRow => (this.stockList[logRow[0]] + ' : ' + logRow[1]))
-      });
+      ]));
+      loglist = (this.searchUser && this.searchUser !== '' ? loglist.filter(log => log[1].trim().includes(this.searchUser.trim())) : loglist);
       return this.isManager ? loglist : loglist.filter(log => String(log[1]).trim() === String(this.user).trim())
     },
     monthList() {
-      const loglist = this.logListComputed;
-      const monthList = Array.from(new Set(loglist.map(e=> e[0].split(' ').splice(0,2).join(' '))));
-      if (monthList.length <= 0) {
-        monthList.push(this.thismonth);
-      }
-      return monthList;
+      return Array.from(new Set([...this.logList.map(e=> e[0].split(' ').splice(0,2).join(' ')), thismonthCalc]));
     },
     monthlyList() {
       const monthlyObject = {};
       for (const month of this.monthList) {
         let sameMonth = {};
-        let sameMonthArray = this.logListComputed.filter(e=>e[0].startsWith(month))
-          .map(log =>log[2].map(e=>e.split(':').map(r=>r.trim())))
+        let sameMonthArray = this.logList.filter(e=>e.length > 0 && e[0].startsWith(month) && e[1] && e[2] && typeof e[2] === 'string');
+        if (sameMonthArray.length === 0) continue;
+        let sameMonthArrayCalculated = sameMonthArray.map(log =>log[2].split('\n').map(e=>e.split(':').map(r=>r.trim())))
           .flat(1)
           .map(e=>([e[0], parseInt(e[1].replace('개', ''), 10)]));
-        for (const sameMonthItem of sameMonthArray) {
+        for (const sameMonthItem of sameMonthArrayCalculated) {
           if (!sameMonth[sameMonthItem[0]]) sameMonth[sameMonthItem[0]] = 0;
           sameMonth[sameMonthItem[0]] += parseInt(sameMonthItem[1], 10);
         }
-        monthlyObject[month] = Object.entries(sameMonth).map(e=>e[0].trim() + ' : ' + e[1] + '개').join('<br>');
+        monthlyObject[month] = Object.entries(sameMonth).map(e=>this.stockList[e[0].trim()] + ' : ' + e[1] + '개').join('<br>');
       }
       return Object.entries(monthlyObject);
     }
@@ -106,7 +107,7 @@ export default {
     },
     getLogList() {
       this.fetching = true;
-      return axios.get('https://sheets.googleapis.com/v4/spreadsheets/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/values/변동현황?key=AIzaSyAS7amO6h0t_fO1wvPOWQpvs7AX2z4rr6I').then(({ data }) => data.values)
+      return axios.get('https://sheets.googleapis.com/v4/spreadsheets/1S3iYUo638NEz3cUXcFlWctLBnqC1FT-rAdoVg91e3FM/values/변동내역?key=AIzaSyAS7amO6h0t_fO1wvPOWQpvs7AX2z4rr6I').then(({ data }) => data.values)
         .then(([head, ...logList]) => {
           this.logList = logList.filter(e=>e[2]);
           this.fetching = false;
