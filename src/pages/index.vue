@@ -33,6 +33,7 @@
 
 <script>
 import axios from 'axios';
+
 export default {
   name: 'index',
   data() {
@@ -108,8 +109,10 @@ export default {
         alert('사용할 물품에 수량을 입력하세요.');
         return;
       }
+      const date = new Date();
+      const time = date.getFullYear().toString().padStart(4, '0') + '. ' + (date.getMonth() + 1).toString().padStart(2, '0') + '. ' + date.getDate().toString().padStart(2, '0') + '.'
 
-      this.appendLog({time: new Date().toLocaleDateString(), user: this.user, use: Object.entries(this.touseList).filter(e=>e[1] && e[1]!==0).map(e=>([e[0].split('|')[0].slice(1), e[1]])), useString: Object.entries(this.touseList).filter(e=>e[1] && e[1]!==0).map(e=>[e[0].split('|')[1], e[1]].join(':')).join('|')});
+      this.appendLog({time, user: this.user, use: Object.entries(this.touseList).filter(e=>e[1] && e[1]!==0).map(e=>([e[0].split('|')[0].slice(1), e[1]]))});
       this.touseList = {}
 
     },
