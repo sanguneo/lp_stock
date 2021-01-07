@@ -54,7 +54,7 @@ export default {
     },
   },
   watch: {
-    user(user, olduser) {
+    user(user) {
       window.localStorage.lpuser = user;
     }
   },
